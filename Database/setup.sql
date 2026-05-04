@@ -1,9 +1,3 @@
--- ============================================================
--- Inventory & Order Management System - Database Setup Script
--- Run this ONLY if you're NOT using EF Core migrations
--- (EF migrations are preferred — see README.md)
--- ============================================================
-
 USE master;
 GO
 
@@ -17,7 +11,9 @@ GO
 USE InventoryOrderDB;
 GO
 
+-- =============================
 -- Products table
+-- =============================
 IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='Products' AND xtype='U')
 BEGIN
     CREATE TABLE Products (
@@ -26,25 +22,29 @@ BEGIN
         SKU             NVARCHAR(50)  NOT NULL,
         Price           DECIMAL(10,2) NOT NULL,
         QuantityInStock INT           NOT NULL DEFAULT 0,
-        CreatedAt       DATETIME      NOT NULL DEFAULT GETDATE(),
+        CreatedAt       DATETIME2     NOT NULL DEFAULT SYSDATETIME(),
         CONSTRAINT UQ_Products_SKU UNIQUE (SKU)
     );
 END
 GO
 
+-- =============================
 -- Orders table
+-- =============================
 IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='Orders' AND xtype='U')
 BEGIN
     CREATE TABLE Orders (
         Id           INT IDENTITY(1,1) PRIMARY KEY,
         CustomerName NVARCHAR(150)  NOT NULL,
-        OrderDate    DATETIME       NOT NULL DEFAULT GETDATE(),
+        OrderDate    DATETIME2      NOT NULL DEFAULT SYSDATETIME(),
         TotalAmount  DECIMAL(10,2)  NOT NULL DEFAULT 0
     );
 END
 GO
 
+-- =============================
 -- OrderItems table
+-- =============================
 IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='OrderItems' AND xtype='U')
 BEGIN
     CREATE TABLE OrderItems (
@@ -53,15 +53,26 @@ BEGIN
         ProductId INT           NOT NULL,
         Quantity  INT           NOT NULL,
         UnitPrice DECIMAL(10,2) NOT NULL,
-        CONSTRAINT FK_OrderItems_Orders   FOREIGN KEY (OrderId)   REFERENCES Orders(Id)   ON DELETE CASCADE,
-        CONSTRAINT FK_OrderItems_Products FOREIGN KEY (ProductId) REFERENCES Products(Id)  ON DELETE RESTRICT
+
+        CONSTRAINT FK_OrderItems_Orders 
+            FOREIGN KEY (OrderId) 
+            REFERENCES Orders(Id) 
+            ON DELETE CASCADE,
+
+        CONSTRAINT FK_OrderItems_Products 
+            FOREIGN KEY (ProductId) 
+            REFERENCES Products(Id) 
+            ON DELETE NO ACTION
     );
+
     CREATE INDEX IX_OrderItems_OrderId   ON OrderItems(OrderId);
     CREATE INDEX IX_OrderItems_ProductId ON OrderItems(ProductId);
 END
 GO
 
--- ─── Seed Sample Products ──────────────────────────────────────────────────
+-- =============================
+-- Seed Sample Products
+-- =============================
 IF NOT EXISTS (SELECT 1 FROM Products)
 BEGIN
     INSERT INTO Products (Name, SKU, Price, QuantityInStock) VALUES
