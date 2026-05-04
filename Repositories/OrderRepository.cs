@@ -23,7 +23,7 @@ namespace InventoryOrderSystem.Repositories
         private SqlConnection GetConnection() =>
             new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
 
-        // Dapper reads
+
         public async Task<IEnumerable<OrderListViewModel>> GetAllAsync()
         {
             using var conn = GetConnection();
@@ -86,7 +86,6 @@ namespace InventoryOrderSystem.Repositories
             };
         }
 
-        // EF Core writes with transaction
         public async Task<int> CreateAsync(Order order, List<OrderItem> items)
         {
             using var transaction = await _context.Database.BeginTransactionAsync();
