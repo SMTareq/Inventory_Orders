@@ -1,4 +1,4 @@
-@model DashboardViewModel
+﻿@model DashboardViewModel
 @{
     ViewData["Title"] = "Dashboard";
 }
@@ -51,7 +51,7 @@
         <div class="card shadow-sm border-0 h-100">
             <div class="card-header bg-warning bg-opacity-10 border-0 d-flex align-items-center gap-2">
                 <i class="bi bi-exclamation-triangle-fill text-warning"></i>
-                <strong>Low Stock Alert(>10)</strong>
+                <strong>Low Stock Alert(≤ 10)</strong>
                 <span class="badge bg-warning text-dark ms-auto">@Model.LowStockProducts.Count</span>
             </div>
             <div class="card-body p-0">
