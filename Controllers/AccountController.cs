@@ -1,0 +1,78 @@
+using InventoryOrderSystem.Models;
+using InventoryOrderSystem.ViewModels;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+
+namespace InventoryOrderSystem.Controllers
+{
+    public class AccountController : Controller
+    {
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly ILogger<AccountController> _logger;
+
+        public AccountController(UserManager<ApplicationUser> userManager,
+            SignInManager<ApplicationUser> signInManager,
+            ILogger<AccountController> logger)
+        {
+            _userManager = userManager;
+            _signInManager = signInManager;
+            _logger = logger;
+        }
+
+        [HttpGet]
+        public IActionResult Register() => View();
+
+        [HttpPost, ValidateAntiForgeryToken]
+        public async Task<IActionResult> Register(RegisterViewModel vm)
+        {
+            if (!ModelState.IsValid) return View(vm);
+
+            var user = new ApplicationUser { UserName = vm.Email, Email = vm.Email, FullName = vm.FullName };
+            var result = await _userManager.CreateAsync(user, vm.Password);
+
+            if (result.Succeeded)
+            {
+                await _signInManager.SignInAsync(user, isPersistent: false);
+                _logger.LogInformation("New user registered: {Email}", vm.Email);
+                return RedirectToAction("Index", "Home");
+            }
+
+            foreach (var error in result.Errors)
+                ModelState.AddModelError(string.Empty, error.Description);
+
+            return View(vm);
+        }
+
+        [HttpGet]
+        public IActionResult Login(string? returnUrl = null)
+        {
+            ViewBag.ReturnUrl = returnUrl;
+            return View();
+        }
+
+        [HttpPost, ValidateAntiForgeryToken]
+        public async Task<IActionResult> Login(LoginViewModel vm, string? returnUrl = null)
+        {
+            if (!ModelState.IsValid) return View(vm);
+
+            var result = await _signInManager.PasswordSignInAsync(vm.Email, vm.Password, vm.RememberMe, lockoutOnFailure: false);
+
+            if (result.Succeeded)
+            {
+                _logger.LogInformation("User logged in: {Email}", vm.Email);
+                return LocalRedirect(returnUrl ?? Url.Content("~/"));
+            }
+
+            ModelState.AddModelError(string.Empty, "Invalid email or password.");
+            return View(vm);
+        }
+
+        [HttpPost, ValidateAntiForgeryToken]
+        public async Task<IActionResult> Logout()
+        {
+            await _signInManager.SignOutAsync();
+            return RedirectToAction("Login");
+        }
+    }
+}

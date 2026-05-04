@@ -1,0 +1,123 @@
+@model DashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0"><i class="bi bi-speedometer2 me-2 text-primary"></i>Dashboard</h2>
+    <small class="text-muted">@DateTime.Now.ToString("dddd, MMMM d yyyy")</small>
+</div>
+
+<!-- KPI Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100 bg-primary text-white">
+            <div class="card-body d-flex align-items-center gap-3">
+                <i class="bi bi-currency-dollar fs-1 opacity-75"></i>
+                <div>
+                    <div class="fs-2 fw-bold">@Model.TotalSales.ToString("C")</div>
+                    <div class="opacity-75">Total Sales</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100 bg-success text-white">
+            <div class="card-body d-flex align-items-center gap-3">
+                <i class="bi bi-cart-check fs-1 opacity-75"></i>
+                <div>
+                    <div class="fs-2 fw-bold">@Model.TotalOrders</div>
+                    <div class="opacity-75">Total Orders</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100 bg-info text-white">
+            <div class="card-body d-flex align-items-center gap-3">
+                <i class="bi bi-box-seam fs-1 opacity-75"></i>
+                <div>
+                    <div class="fs-2 fw-bold">@Model.TotalProducts</div>
+                    <div class="opacity-75">Total Products</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <!-- Low Stock Alert -->
+    <div class="col-lg-5">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-warning bg-opacity-10 border-0 d-flex align-items-center gap-2">
+                <i class="bi bi-exclamation-triangle-fill text-warning"></i>
+                <strong>Low Stock Alert</strong>
+                <span class="badge bg-warning text-dark ms-auto">@Model.LowStockProducts.Count</span>
+            </div>
+            <div class="card-body p-0">
+                @if (!Model.LowStockProducts.Any())
+                {
+                    <p class="text-center text-muted py-4">All products are well stocked.</p>
+                }
+                else
+                {
+                    <table class="table table-sm table-hover mb-0">
+                        <thead class="table-light">
+                            <tr><th>Product</th><th>SKU</th><th class="text-end">Stock</th></tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var p in Model.LowStockProducts)
+                            {
+                                <tr>
+                                    <td><a asp-controller="Product" asp-action="Edit" asp-route-id="@p.Id">@p.Name</a></td>
+                                    <td><code>@p.SKU</code></td>
+                                    <td class="text-end">
+                                        <span class="badge @(p.QuantityInStock == 0 ? "bg-danger" : "bg-warning text-dark")">
+                                            @p.QuantityInStock
+                                        </span>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Orders -->
+    <div class="col-lg-7">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-primary bg-opacity-10 border-0 d-flex align-items-center gap-2">
+                <i class="bi bi-clock-history text-primary"></i>
+                <strong>Recent Orders</strong>
+                <a asp-controller="Order" asp-action="Index" class="btn btn-sm btn-outline-primary ms-auto">View All</a>
+            </div>
+            <div class="card-body p-0">
+                @if (!Model.RecentOrders.Any())
+                {
+                    <p class="text-center text-muted py-4">No orders yet.</p>
+                }
+                else
+                {
+                    <table class="table table-sm table-hover mb-0">
+                        <thead class="table-light">
+                            <tr><th>#</th><th>Customer</th><th>Date</th><th class="text-end">Total</th></tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var o in Model.RecentOrders)
+                            {
+                                <tr>
+                                    <td><a asp-controller="Order" asp-action="Details" asp-route-id="@o.Id">#@o.Id</a></td>
+                                    <td>@o.CustomerName</td>
+                                    <td>@o.OrderDate.ToString("MMM d, yyyy")</td>
+                                    <td class="text-end fw-semibold">@o.TotalAmount.ToString("C")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+            </div>
+        </div>
+    </div>
+</div>

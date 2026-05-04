@@ -1,0 +1,171 @@
+@model IEnumerable<InventoryOrderSystem.Models.Product>
+@{
+    ViewData["Title"] = "Products";
+    var currentPage = (int)ViewBag.Page;
+    var totalPages = (int)ViewBag.TotalPages;
+    var search = (string?)ViewBag.Search ?? "";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0"><i class="bi bi-box-seam me-2 text-primary"></i>Products</h2>
+    <a asp-action="Create" class="btn btn-primary">
+        <i class="bi bi-plus-lg me-1"></i>Add Product
+    </a>
+</div>
+
+<!-- AJAX Search Bar -->
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body">
+        <div class="row g-2">
+            <div class="col-md-6">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                    <input type="text" id="ajaxSearch" class="form-control" placeholder="Live search by name or SKU..."
+                           value="@search" autocomplete="off" />
+                    <button class="btn btn-outline-secondary" id="clearSearch" type="button">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <form method="get" asp-action="Index" class="d-flex gap-2">
+                    <input type="text" name="search" class="form-control" placeholder="Full search + pagination..."
+                           value="@search" />
+                    <button class="btn btn-outline-primary" type="submit"><i class="bi bi-search"></i></button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading spinner -->
+<div id="searchSpinner" class="text-center py-3 d-none">
+    <div class="spinner-border text-primary" role="status"></div>
+</div>
+
+<!-- Products Table -->
+<div class="card shadow-sm border-0">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" id="productsTable">
+                <thead class="table-dark">
+                    <tr>
+                        <th>#</th>
+                        <th>Name</th>
+                        <th>SKU</th>
+                        <th>Price</th>
+                        <th>In Stock</th>
+                        <th>Created</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="productsBody">
+                    @foreach (var p in Model)
+                    {
+                        <tr>
+                            <td>@p.Id</td>
+                            <td class="fw-semibold">@p.Name</td>
+                            <td><code>@p.SKU</code></td>
+                            <td>@p.Price.ToString("C")</td>
+                            <td>
+                                <span class="badge @(p.QuantityInStock == 0 ? "bg-danger" : p.QuantityInStock <= 10 ? "bg-warning text-dark" : "bg-success")">
+                                    @p.QuantityInStock
+                                </span>
+                            </td>
+                            <td>@p.CreatedAt.ToString("MMM d, yyyy")</td>
+                            <td class="text-end">
+                                <a asp-action="Edit" asp-route-id="@p.Id" class="btn btn-sm btn-outline-primary me-1">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <form asp-action="Delete" asp-route-id="@p.Id" method="post" class="d-inline confirm-delete">
+                                    @Html.AntiForgeryToken()
+                                    <button class="btn btn-sm btn-outline-danger" type="submit">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                    @if (!Model.Any())
+                    {
+                        <tr><td colspan="7" class="text-center text-muted py-4">No products found.</td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Pagination -->
+@if (totalPages > 1)
+{
+    <nav class="mt-3">
+        <ul class="pagination justify-content-center">
+            <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                <a class="page-link" asp-action="Index" asp-route-page="@(currentPage - 1)" asp-route-search="@search">
+                    <i class="bi bi-chevron-left"></i>
+                </a>
+            </li>
+            @for (int i = 1; i <= totalPages; i++)
+            {
+                <li class="page-item @(i == currentPage ? "active" : "")">
+                    <a class="page-link" asp-action="Index" asp-route-page="@i" asp-route-search="@search">@i</a>
+                </li>
+            }
+            <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                <a class="page-link" asp-action="Index" asp-route-page="@(currentPage + 1)" asp-route-search="@search">
+                    <i class="bi bi-chevron-right"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+}
+
+@section Scripts {
+<script>
+    const searchUrl = '@Url.Action("Search", "Product")';
+    let searchTimer;
+
+    $('#ajaxSearch').on('input', function () {
+        const term = $(this).val().trim();
+        clearTimeout(searchTimer);
+
+        if (term.length < 2) {
+            if (term.length === 0) loadDefaultRows();
+            return;
+        }
+
+        searchTimer = setTimeout(() => ajaxSearch(term), 350);
+    });
+
+    $('#clearSearch').on('click', function () {
+        $('#ajaxSearch').val('');
+        loadDefaultRows();
+    });
+
+    function ajaxSearch(term) {
+        $('#searchSpinner').removeClass('d-none');
+        $.get(searchUrl, { term }, function (res) {
+            const rows = res.data.length === 0
+                ? '<tr><td colspan="7" class="text-center text-muted py-4">No results found.</td></tr>'
+                : res.data.map(p => `
+                    <tr>
+                        <td>${p.id}</td>
+                        <td class="fw-semibold">${p.name}</td>
+                        <td><code>${p.sku}</code></td>
+                        <td>${p.price}</td>
+                        <td><span class="badge ${p.quantityInStock === 0 ? 'bg-danger' : p.quantityInStock <= 10 ? 'bg-warning text-dark' : 'bg-success'}">${p.quantityInStock}</span></td>
+                        <td>${p.createdAt}</td>
+                        <td class="text-end">
+                            <a href="/Product/Edit/${p.id}" class="btn btn-sm btn-outline-primary me-1"><i class="bi bi-pencil"></i></a>
+                        </td>
+                    </tr>`).join('');
+            $('#productsBody').html(rows);
+        }).always(() => $('#searchSpinner').addClass('d-none'));
+    }
+
+    function loadDefaultRows() {
+        window.location.href = '@Url.Action("Index", "Product")';
+    }
+</script>
+}

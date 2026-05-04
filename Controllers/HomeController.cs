@@ -1,0 +1,20 @@
+using InventoryOrderSystem.Services;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+
+namespace InventoryOrderSystem.Controllers
+{
+    [Authorize]
+    public class HomeController : Controller
+    {
+        private readonly IOrderService _orderService;
+
+        public HomeController(IOrderService orderService) => _orderService = orderService;
+
+        public async Task<IActionResult> Index()
+        {
+            var dashboard = await _orderService.GetDashboardAsync();
+            return View(dashboard);
+        }
+    }
+}

@@ -1,0 +1,95 @@
+/* site.css - Custom styles for Inventory & Order System */
+
+:root {
+    --brand: #0d6efd;
+    --sidebar-width: 220px;
+}
+
+body {
+    background-color: #f8f9fa;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+/* Navbar */
+.navbar-brand {
+    font-size: 1.3rem;
+    letter-spacing: 0.5px;
+}
+
+/* Cards */
+.card {
+    border-radius: 0.75rem;
+}
+
+.card-header {
+    border-radius: 0.75rem 0.75rem 0 0 !important;
+    padding: 1rem 1.25rem;
+}
+
+/* Tables */
+.table th {
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.table td {
+    vertical-align: middle;
+}
+
+/* Badges */
+.badge {
+    font-weight: 500;
+    font-size: 0.78rem;
+    padding: 0.35em 0.65em;
+}
+
+/* Forms */
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--brand);
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
+}
+
+/* Order table */
+#orderItemsTable .product-select {
+    min-width: 200px;
+}
+
+#orderItemsTable .qty-input {
+    max-width: 80px;
+}
+
+#orderItemsTable .unit-price {
+    max-width: 90px;
+}
+
+/* Dashboard KPI */
+.card.bg-primary,
+.card.bg-success,
+.card.bg-info {
+    border-radius: 0.75rem;
+}
+
+/* Animations */
+.alert {
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Footer */
+footer {
+    font-size: 0.85rem;
+}
+
+/* Responsive tweaks */
+@media (max-width: 768px) {
+    .table-responsive {
+        font-size: 0.85rem;
+    }
+}

@@ -1,0 +1,78 @@
+@model InventoryOrderSystem.ViewModels.OrderCreateViewModel
+@{
+    ViewData["Title"] = "Create Order";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-9">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-primary text-white d-flex align-items-center gap-2">
+                <i class="bi bi-cart-plus fs-5"></i>
+                <h5 class="mb-0">New Order</h5>
+            </div>
+            <div class="card-body">
+                <form asp-action="Create" method="post" id="orderForm">
+                    @Html.AntiForgeryToken()
+
+                    <div class="mb-4">
+                        <label asp-for="CustomerName" class="form-label fw-semibold fs-6"></label>
+                        <input asp-for="CustomerName" class="form-control form-control-lg"
+                               placeholder="Enter customer name" required />
+                        <span asp-validation-for="CustomerName" class="text-danger small"></span>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="fw-bold mb-0"><i class="bi bi-list-ul me-1"></i>Order Items</h6>
+                        <button type="button" id="addRowBtn" class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-plus-circle me-1"></i>Add Product
+                        </button>
+                    </div>
+
+                    <div class="table-responsive mb-3">
+                        <table class="table table-bordered align-middle" id="orderItemsTable">
+                            <thead class="table-secondary">
+                                <tr>
+                                    <th style="min-width:220px">Product</th>
+                                    <th style="min-width:90px">Qty</th>
+                                    <th style="min-width:100px">Unit Price</th>
+                                    <th style="min-width:110px">Line Total</th>
+                                    <th style="width:50px"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="orderItemsBody">
+                                <!-- Rows injected by JS -->
+                            </tbody>
+                            <tfoot>
+                                <tr class="table-light">
+                                    <td colspan="3" class="text-end fw-bold">Order Total:</td>
+                                    <td class="fw-bold text-success fs-5" id="orderTotal">$0.00</td>
+                                    <td></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+
+                    <div id="stockWarning" class="alert alert-warning d-none">
+                        <i class="bi bi-exclamation-triangle me-1"></i>
+                        <span id="stockWarningText"></span>
+                    </div>
+
+                    <div class="d-flex gap-2 justify-content-end">
+                        <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary btn-lg" id="submitBtn" disabled>
+                            <i class="bi bi-check-circle me-1"></i>Place Order
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script src="~/js/order.js"></script>
+<script>
+    // Pass product data to order.js
+    window.PRODUCTS_URL = '@Url.Action("GetProducts", "Product")';
+</script>
+}

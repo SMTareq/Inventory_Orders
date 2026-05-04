@@ -1,0 +1,52 @@
+@model InventoryOrderSystem.ViewModels.LoginViewModel
+@{
+    ViewData["Title"] = "Login";
+    Layout = "_AuthLayout";
+}
+
+<div class="text-center mb-4">
+    <i class="bi bi-boxes text-primary" style="font-size: 3rem;"></i>
+    <h3 class="mt-2 fw-bold">InvOrders</h3>
+    <p class="text-muted">Sign in to your account</p>
+</div>
+
+<form asp-action="Login" method="post">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
+
+    <div asp-validation-summary="All" class="alert alert-danger"></div>
+
+    <div class="mb-3">
+        <label asp-for="Email" class="form-label fw-semibold"></label>
+        <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+            <input asp-for="Email" class="form-control" placeholder="your@email.com" autocomplete="email" />
+        </div>
+        <span asp-validation-for="Email" class="text-danger small"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Password" class="form-label fw-semibold"></label>
+        <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-lock"></i></span>
+            <input asp-for="Password" class="form-control" placeholder="••••••" autocomplete="current-password" />
+        </div>
+        <span asp-validation-for="Password" class="text-danger small"></span>
+    </div>
+    <div class="mb-4 form-check">
+        <input asp-for="RememberMe" class="form-check-input" />
+        <label asp-for="RememberMe" class="form-check-label"></label>
+    </div>
+
+    <button type="submit" class="btn btn-primary w-100 btn-lg">
+        <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+    </button>
+</form>
+
+<hr />
+<p class="text-center mb-0">
+    Don't have an account? <a asp-action="Register">Register</a>
+</p>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
