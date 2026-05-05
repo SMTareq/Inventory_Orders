@@ -147,12 +147,6 @@ Navigate to `https://localhost:5001` and register your first account.
 - Low Stock Alert (≤ 10 units)
 - 5 most recent orders
 
-### Bonus Features
-- Delete order (restores stock)
-- Pagination on product list
-- Export all orders to CSV
-- Serilog structured logging to file + console
-
 ---
 
 ## Architecture Notes
@@ -174,22 +168,9 @@ Controller → Service → Repository → DB
 | INSERT / UPDATE / DELETE | EF Core | Change tracking, transactions, migrations |
 | SELECT (lists, reports) | Dapper | Performance, raw SQL control |
 
-### Transaction Handling (Order Creation)
-
-```
-BEGIN TRANSACTION
-  FOR each item:
-    1. Lock product row
-    2. Check stock >= requested qty
-    3. Deduct stock
-  4. Calculate total
-  5. Save Order + OrderItems
-COMMIT (or ROLLBACK on any error)
-```
-
 ---
 
-## API Endpoints
+## Endpoints
 
 | Method | URL | Description |
 |---|---|---|
